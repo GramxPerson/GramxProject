@@ -1011,7 +1011,7 @@ do
         });
     end;
 
-    function Funcs:AddLabel(Text, DoesWrap, Pos)
+    function Funcs:AddLabel(Text, Pos, PosDoesWrap)
         local Label = {};
 
         local Groupbox = self;
@@ -1020,11 +1020,11 @@ do
         if Pos == nil then
             Pos = "Left"
         end
-        if Pos == "Left" then
+        if tostring(Pos) == "Left" then
             TextPos = Enum.TextXAlignment.Left;
-        elseif Pos == "Center" then
+        elseif tostring(Pos) == "Center" then
             TextPos = Enum.TextXAlignment.Center;
-        elseif Pos == "Right" then
+        elseif tostring(Pos) == "Right" then
             TextPos = Enum.TextXAlignment.Right;
         end
         local TextLabel = Library:CreateLabel({
