@@ -1011,19 +1011,29 @@ do
         });
     end;
 
-    function Funcs:AddLabel(Text, DoesWrap)
+    function Funcs:AddLabel(Text, DoesWrap, Pos)
         local Label = {};
 
         local Groupbox = self;
         local Container = Groupbox.Container;
-
+        local TextPos;
+        if Pos == nil then
+            Pos = "Left"
+        end
+        if Pos == "Left" then
+            TextPos = Enum.TextXAlignment.Left;
+        elseif Pos == "Center" then
+            TextPos = Enum.TextXAlignment.Center;
+        elseif Pos == "Right" then
+            TextPos = Enum.TextXAlignment.Right;
+        end
         local TextLabel = Library:CreateLabel({
             Size = UDim2.new(1, -4, 0, 15);
             TextSize = 14;
             Text = Text;
             TextWrapped = DoesWrap or false,
             RichText = true,
-            TextXAlignment = Enum.TextXAlignment.Center;
+            TextXAlignment = TextPos,
             ZIndex = 5;
             Parent = Container;
         });
