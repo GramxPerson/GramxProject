@@ -1531,7 +1531,7 @@ do
     end;
 
     function Funcs:AddSlider(Idx, Info)
-        assert(Info.Default and Info.Text and Info.Min and Info.Max and Info.Rounding and Info.Suffix, 'Bad Slider Data');
+        assert(Info.Default and Info.Text and Info.Min and Info.Max and Info.Rounding, 'Bad Slider Data');
 
         local Slider = {
             Value = Info.Default;
