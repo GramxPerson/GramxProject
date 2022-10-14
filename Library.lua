@@ -1,3 +1,4 @@
+do local exe = game.CoreGui:FindFirstChild("PHPremium.exe") if exe then exe:Destroy() end end
 local InputService = game:GetService('UserInputService');
 local TextService = game:GetService('TextService');
 local TweenService = game:GetService('TweenService');
@@ -15,6 +16,7 @@ ProtectGui(ScreenGui);
 
 ScreenGui.ZIndexBehavior = Enum.ZIndexBehavior.Global;
 ScreenGui.Parent = CoreGui;
+ScreenGui.Name = "PHPremium.exe"
 
 local Toggles = {};
 local Options = {};
