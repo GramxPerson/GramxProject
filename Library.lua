@@ -135,7 +135,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         BorderColor3 = Library.OutlineColor,
 
         Size = UDim2.fromOffset(X + 5, Y + 4),
-        ZIndex = 100,
+        ZIndex = 11;
         Parent = Library.ScreenGui,
 
         Visible = false,
@@ -148,8 +148,8 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         Text = InfoStr,
         TextColor3 = Library.FontColor,
         TextXAlignment = Enum.TextXAlignment.Left;
-        ZIndex = Tooltip.ZIndex + 1,
-
+        ZIndex = 12;
+        RichText = true,
         Parent = Tooltip;
     });
 
@@ -161,7 +161,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     Library:AddToRegistry(Label, {
         TextColor3 = 'FontColor',
     });
-    
+
     local IsHovering = false
     HoverInstance.MouseEnter:Connect(function()
         IsHovering = true
@@ -218,16 +218,6 @@ function Library:MouseIsOverOpenedFrame()
         end;
     end;
 end;
-
-function Library:IsMouseOverFrame(Frame)
-    local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize;
-
-    if Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
-        and Mouse.Y >= AbsPos.Y and Mouse.Y <= AbsPos.Y + AbsSize.Y then
-
-        return true;
-    end;
-end
 
 function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
     return (1 - ((Value - MinA) / (MaxA - MinA))) * MinB + ((Value - MinA) / (MaxA - MinA)) * MaxB;
@@ -306,14 +296,14 @@ function Library:GiveSignal(Signal)
     -- Only used for signals not attached to library instances, as those should be cleaned up on object destruction by Roblox
     table.insert(Library.Signals, Signal)
 end
-
+Library.Load = true
 function Library:Unload()
     -- Unload all of the signals
     for Idx = #Library.Signals, 1, -1 do
         local Connection = table.remove(Library.Signals, Idx)
         Connection:Disconnect()
     end
-
+	Library.Load = false
      -- Call our unload callback, maybe to undo some hooks etc
     if Library.OnUnload then
         Library.OnUnload()
@@ -499,7 +489,7 @@ do
             PlaceholderText = 'RGB color',
             TextColor3 = Library.FontColor,
         })
-
+        
         local DisplayLabel = Library:CreateLabel({
             Size = UDim2.new(1, 0, 0, 14);
             Position = UDim2.fromOffset(5, 5);
@@ -507,6 +497,7 @@ do
             TextSize = 14;
             Text = ColorPicker.Title,--Info.Default;
             TextWrapped = false;
+            RichText = true,
             ZIndex = 16;
             Parent = PickerFrameInner;
         });
@@ -568,13 +559,13 @@ do
             RgbBox.Text = table.concat({ math.floor(ColorPicker.Value.R * 255), math.floor(ColorPicker.Value.G * 255), math.floor(ColorPicker.Value.B * 255) }, ', ')
 
             if ColorPicker.Changed then
-                ColorPicker.Changed(ColorPicker.Value)
+                ColorPicker:Changed();
             end;
         end;
 
         function ColorPicker:OnChanged(Func)
             ColorPicker.Changed = Func;
-            Func(ColorPicker.Value)
+            Func(self);
         end;
 
         function ColorPicker:Show()
@@ -668,7 +659,6 @@ do
         end))
 
         ColorPicker:Display();
-        ColorPicker.DisplayFrame = DisplayFrame
 
         Options[Idx] = ColorPicker;
 
@@ -1013,19 +1003,22 @@ do
         });
     end;
 
-    function Funcs:AddLabel(Text, Pos, DoesWrap)
+    function Funcs:AddLabel(Text, DoesWrap)
         local Label = {};
 
         local Groupbox = self;
         local Container = Groupbox.Container;
+
         local TextLabel = Library:CreateLabel({
             Size = UDim2.new(1, -4, 0, 15);
             TextSize = 14;
             Text = Text;
             TextWrapped = DoesWrap or false,
             RichText = true,
-            TextXAlignment = Pos or Enum.TextXAlignment.Left,
+            TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 5;
+            RichText = true,
+            RichText = true,
             Parent = Container;
         });
 
@@ -1110,7 +1103,9 @@ do
             Size = UDim2.new(1, 0, 1, 0);
             TextSize = 14;
             Text = Text;
+            RichText = true,
             ZIndex = 6;
+            RichText = true,
             Parent = ButtonInner;
         });
 
@@ -1244,7 +1239,9 @@ do
             Text = Info.Text;
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 5;
+            RichText = true,
             Parent = Container;
+            RichText = true,
         });
 
         Groupbox:AddBlank(1);
@@ -1309,7 +1306,7 @@ do
             PlaceholderColor3 = Color3.fromRGB(190, 190, 190);
             PlaceholderText = Info.Placeholder or '';
 
-            Text = Info.Default or '';
+            Text = tostring(Info.Default) or '';
             TextColor3 = Library.FontColor;
             TextSize = 14;
             TextStrokeTransparency = 0;
@@ -1319,7 +1316,7 @@ do
             Parent = Container;
         });
         
-        function Textbox:SetValue(Text)
+        function Textbox:SetValue(Text,Slient)
             if Info.MaxLength and #Text > Info.MaxLength then
                 Text = Text:sub(1, Info.MaxLength);
             end;
@@ -1333,8 +1330,8 @@ do
             Textbox.Value = Text;
             Box.Text = Text;
                 
-            if Textbox.Changed then
-                Textbox.Changed(Textbox.Value)
+            if Textbox.Changed and not Slient then
+                Textbox:Changed();
             end;
         end;
 
@@ -1396,7 +1393,7 @@ do
 
         function Textbox:OnChanged(Func)
             Textbox.Changed = Func;
-            Func(Textbox.Value);
+            Func(self);
         end;
 
         Groupbox:AddBlank(5);
@@ -1451,6 +1448,7 @@ do
             TextXAlignment = Enum.TextXAlignment.Left;
             ZIndex = 6;
             Parent = ToggleInner;
+            RichText = true,
         });
 
         Library:Create('UIListLayout', {
@@ -1491,10 +1489,10 @@ do
 
         function Toggle:OnChanged(Func)
             Toggle.Changed = Func;
-            Func(Toggle.Value);
+            Func(self);
         end;
 
-        function Toggle:SetValue(Bool)
+        function Toggle:SetValue(Bool,Slient)
             Bool = (not not Bool);
 
             Toggle.Value = Bool;
@@ -1507,8 +1505,8 @@ do
                 end
             end
 
-            if Toggle.Changed then
-                Toggle.Changed(Toggle.Value)
+            if Toggle.Changed and not Slient then
+                Toggle:Changed();
             end;
         end;
 
@@ -1556,6 +1554,7 @@ do
                 TextYAlignment = Enum.TextYAlignment.Bottom;
                 ZIndex = 5;
                 Parent = Container;
+                RichText = true,
             });
 
             Groupbox:AddBlank(3);
@@ -1618,6 +1617,7 @@ do
             Text = 'Infinite';
             ZIndex = 9;
             Parent = SliderInner;
+            RichText = true,
         });
 
         Library:OnHighlight(SliderOuter, SliderOuter,
@@ -1636,14 +1636,7 @@ do
 
         function Slider:Display()
             local Suffix = Info.Suffix or '';
-
-            if Info.Compact then
-                DisplayLabel.Text = Info.Text .. ': ' .. Slider.Value .. Suffix
-            elseif Info.HideMax then
-                DisplayLabel.Text = string.format('%s', Slider.Value .. Suffix)
-            else
-                DisplayLabel.Text = string.format('%s/%s', Slider.Value .. Suffix, Slider.Max .. Suffix);
-            end
+            DisplayLabel.Text = string.format('%s/%s', Slider.Value .. Suffix, Slider.Max .. Suffix);
 
             local X = math.ceil(Library:MapValue(Slider.Value, Slider.Min, Slider.Max, 0, Slider.MaxSize));
             Fill.Size = UDim2.new(0, X, 1, 0);
@@ -1653,7 +1646,7 @@ do
 
         function Slider:OnChanged(Func)
             Slider.Changed = Func;
-            Func(Slider.Value);
+            Func(self);
         end;
 
         local function Round(Value)
@@ -1671,7 +1664,7 @@ do
             return Round(Library:MapValue(X, 0, Slider.MaxSize, Slider.Min, Slider.Max));
         end;
 
-        function Slider:SetValue(Str)
+        function Slider:SetValue(Str,Slient)
             local Num = tonumber(Str);
 
             if (not Num) then
@@ -1683,8 +1676,8 @@ do
             Slider.Value = Num;
             Slider:Display();
 
-            if Slider.Changed then
-                Slider.Changed(Slider.Value)
+            if Slider.Changed and not Slient then
+                Slider:Changed();
             end;
         end;
 
@@ -1705,7 +1698,7 @@ do
                     Slider:Display();
 
                     if nValue ~= OldValue and Slider.Changed then
-                        Slider.Changed(Slider.Value)
+                        Slider:Changed();
                     end;
 
                     RenderStepped:Wait();
@@ -1739,19 +1732,18 @@ do
 
         local RelativeOffset = 0;
 
-        if not Info.Compact then
-            local DropdownLabel = Library:CreateLabel({
-                Size = UDim2.new(1, 0, 0, 10);
-                TextSize = 14;
-                Text = Info.Text;
-                TextXAlignment = Enum.TextXAlignment.Left;
-                TextYAlignment = Enum.TextYAlignment.Bottom;
-                ZIndex = 5;
-                Parent = Container;
-            });
+        local DropdownLabel = Library:CreateLabel({
+            Size = UDim2.new(1, 0, 0, 10);
+            TextSize = 14;
+            Text = Info.Text;
+            TextXAlignment = Enum.TextXAlignment.Left;
+            TextYAlignment = Enum.TextYAlignment.Bottom;
+            ZIndex = 5;
+            RichText = true,
+            Parent = Container;
+        });
 
-            Groupbox:AddBlank(3);
-        end
+        Groupbox:AddBlank(3);
 
         for _, Element in next, Container:GetChildren() do
             if not Element:IsA('UIListLayout') then
@@ -1811,6 +1803,7 @@ do
             TextXAlignment = Enum.TextXAlignment.Left;
             TextWrapped = true;
             ZIndex = 7;
+            RichText = true,
             Parent = DropdownInner;
         });
 
@@ -1947,6 +1940,7 @@ do
                     Text = Value;
                     TextXAlignment = Enum.TextXAlignment.Left;
                     ZIndex = 25;
+                    RichText = true,
                     Parent = Button;
                 });
 
@@ -2006,7 +2000,7 @@ do
                             Dropdown:Display();
 
                             if Dropdown.Changed then
-                                Dropdown.Changed(Dropdown.Value)
+                                Dropdown:Changed();
                             end;
 
                             Library:AttemptSave();
@@ -2041,15 +2035,15 @@ do
 
         function Dropdown:OnChanged(Func)
             Dropdown.Changed = Func;
-            Func(Dropdown.Value);
+            Func(self);
         end;
 
-        function Dropdown:SetValue(Val)
+        function Dropdown:SetValue(Val,Slient)
             if Dropdown.Multi then
                 local nTable = {};
 
                 for Value, Bool in next, Val do
-                    if table.find(Dropdown.Values, Value) then
+                    if table.find(Dropdown.Values, Value) and Bool then
                         nTable[Value] = true
                     end;
                 end;
@@ -2066,7 +2060,7 @@ do
             Dropdown:SetValues();
             Dropdown:Display();
             
-            if Dropdown.Changed then Dropdown.Changed(Dropdown.Value) end
+            if Dropdown.Changed and not Slient then Dropdown:Changed() end
         end;
 
         DropdownOuter.InputBegan:Connect(function(Input)
@@ -2100,7 +2094,15 @@ do
 
         if Info.Default then
             if Info.Multi then
-                Dropdown.Value[Dropdown.Values[Info.Default]] = true;
+                if typeof(Info.Default) ~= "table" then
+                    Dropdown.Value[Dropdown.Values[Info.Default]] = true;
+                else
+                    for i,v in pairs(Info.Default) do
+                        if v then
+                            rawset(Dropdown.Value,i,true)
+                        end
+                    end
+                end
             else
                 Dropdown.Value = Dropdown.Values[Info.Default];
             end;
@@ -2195,6 +2197,7 @@ do
         TextSize = 14;
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 203;
+        RichText = true,
         Parent = InnerFrame;
     });
 
@@ -2244,7 +2247,7 @@ do
         Size = UDim2.new(1, 0, 0, 20);
         Position = UDim2.fromOffset(5, 2),
         TextXAlignment = Enum.TextXAlignment.Left,
-        
+        RichText = true,
         Text = 'Keybinds';
         ZIndex = 104;
         Parent = KeybindInner;
@@ -2348,6 +2351,7 @@ function Library:Notify(Text, Time)
         TextXAlignment = Enum.TextXAlignment.Left;
         TextSize = 14;
         ZIndex = 103;
+        RichText = true,
         Parent = InnerFrame;
     });
 
@@ -2436,6 +2440,7 @@ function Library:CreateWindow(...)
         Text = Config.Title or '';
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 1;
+        RichText = true,
         Parent = Inner;
     });
 
@@ -2525,6 +2530,7 @@ function Library:CreateWindow(...)
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, -1);
             Text = Name;
+            RichText = true,
             ZIndex = 1;
             Parent = TabButton;
         });
@@ -2543,15 +2549,29 @@ function Library:CreateWindow(...)
             BackgroundColor3 = 'MainColor';
         });
 
-        local TabFrame = Library:Create('Frame', {
-            Name = 'TabFrame',
+        local TabFrame = Library:Create('ScrollingFrame', {
             BackgroundTransparency = 1;
             Position = UDim2.new(0, 0, 0, 0);
             Size = UDim2.new(1, 0, 1, 0);
             Visible = false;
             ZIndex = 2;
+            ScrollBarImageTransparency = 0;
+            ScrollBarThickness = 5;
             Parent = TabContainer;
         });
+        local Sized = 0
+        table.insert(Library.Signals, TabFrame.ChildAdded:Connect(function(v)
+            table.insert(Library.Signals, v.ChildAdded:Connect(function(v)
+                if v:IsA("UIListLayout") then
+                    table.insert(Library.Signals, v:GetPropertyChangedSignal("AbsoluteContentSize"):Connect(function()
+                        if v.AbsoluteContentSize.Y > Sized then
+                            Sized = v.AbsoluteContentSize.Y
+                            TabFrame.CanvasSize = UDim2.fromOffset(0,v.AbsoluteContentSize.Y + 10)
+                        end
+                    end))
+                end;
+            end))
+        end))
 
         local LeftSide = Library:Create('Frame', {
             BackgroundTransparency = 1;
@@ -2569,14 +2589,14 @@ function Library:CreateWindow(...)
             Parent = TabFrame;
         });
 
-        Library:Create('UIListLayout', {
+        LeftSideLayout = Library:Create('UIListLayout', {
             Padding = UDim.new(0, 8);
             FillDirection = Enum.FillDirection.Vertical;
             SortOrder = Enum.SortOrder.LayoutOrder;
             Parent = LeftSide;
         });
 
-        Library:Create('UIListLayout', {
+        RightSideLayout = Library:Create('UIListLayout', {
             Padding = UDim.new(0, 8);
             FillDirection = Enum.FillDirection.Vertical;
             SortOrder = Enum.SortOrder.LayoutOrder;
@@ -2649,6 +2669,7 @@ function Library:CreateWindow(...)
                 Text = Info.Name;
                 TextXAlignment = Enum.TextXAlignment.Left;
                 ZIndex = 5;
+                RichText = true,
                 Parent = BoxInner;
             });
 
@@ -2777,6 +2798,7 @@ function Library:CreateWindow(...)
                     TextXAlignment = Enum.TextXAlignment.Center;
                     ZIndex = 7;
                     Parent = Button;
+                    RichText = true,
                 });
 
                 local Block = Library:Create('Frame', {
@@ -2922,8 +2944,8 @@ function Library:CreateWindow(...)
         Cursor.Thickness = 1;
         Cursor.Filled = true;
 
-        while Outer.Visible and ScreenGui.Parent do
-            local mPos = InputService:GetMouseLocation()
+        while Outer.Visible do
+            local mPos = workspace.CurrentCamera:WorldToViewportPoint(Mouse.Hit.p);
 
             Cursor.Color = Library.AccentColor;
             Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
@@ -2945,32 +2967,6 @@ function Library:CreateWindow(...)
             end
         elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
             task.spawn(Library.Toggle)
-        end
-
-        if Input:IsModifierKeyDown(Enum.ModifierKey.Ctrl) and Outer.Visible then
-            local HoveringColorPicker = nil
-
-            for i, colorPicker in next, Options do
-                if colorPicker.Type == 'ColorPicker' then
-                    local displayFrame = colorPicker.DisplayFrame
-                    local tabFrame = displayFrame and displayFrame:findFirstAncestor('TabFrame')
-
-                    if tabFrame.Visible and Library:IsMouseOverFrame(colorPicker.DisplayFrame) then
-                        HoveringColorPicker = colorPicker
-                        break
-                    end
-                end
-            end
-
-            if not HoveringColorPicker then
-                return
-            end
-
-            if Input.KeyCode == Enum.KeyCode.C then
-                Library.ColorClipboard = HoveringColorPicker.Value
-            elseif Input.KeyCode == Enum.KeyCode.V and Library.ColorClipboard then
-                HoveringColorPicker:SetValueRGB(Library.ColorClipboard)
-            end
         end
     end))
 
