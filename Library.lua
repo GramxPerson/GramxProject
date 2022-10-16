@@ -1003,22 +1003,19 @@ do
         });
     end;
 
-    function Funcs:AddLabel(Text, DoesWrap)
+    function Funcs:AddLabel(Text, Pos, DoesWrap)
         local Label = {};
 
         local Groupbox = self;
         local Container = Groupbox.Container;
-
         local TextLabel = Library:CreateLabel({
             Size = UDim2.new(1, -4, 0, 15);
             TextSize = 14;
             Text = Text;
             TextWrapped = DoesWrap or false,
             RichText = true,
-            TextXAlignment = Enum.TextXAlignment.Left;
+            TextXAlignment = Pos or Enum.TextXAlignment.Left,
             ZIndex = 5;
-            RichText = true,
-            RichText = true,
             Parent = Container;
         });
 
