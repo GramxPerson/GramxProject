@@ -83,8 +83,7 @@ local ThemeManager = {} do
 		groupbox:AddLabel('Font color')	:AddColorPicker('FontColor', { Default = self.Library.FontColor });
 
 		groupbox:AddButton('Default Theme', function()
-			self:SaveDefault(Options.ThemeManager_ThemeList.Value)
-			self.Library:Notify(string.format('Set default theme to %q', Options.ThemeManager_ThemeList.Value))
+		    ThemeManager:ApplyTheme('Default')
 		end)
 
 		ThemeManager:LoadDefault()
