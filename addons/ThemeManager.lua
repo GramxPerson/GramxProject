@@ -86,8 +86,6 @@ local ThemeManager = {} do
 		    ThemeManager:ApplyTheme('Default')
 		end)
 
-		ThemeManager:LoadDefault()
-
 		local function UpdateTheme()
 			self:ThemeUpdate()
 		end
