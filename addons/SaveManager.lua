@@ -68,7 +68,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:Save(name)
-		local fullPath = self.Folder .. '/settings/' .. name .. '.json'
+		local fullPath = self.Folder .. '/settings/' .. name .. '.cfg'
 
 		local data = {
 			objects = {}
@@ -97,7 +97,7 @@ local SaveManager = {} do
 	end
 
 	function SaveManager:Load(name)
-		local file = self.Folder .. '/settings/' .. name .. '.json'
+		local file = self.Folder .. '/settings/' .. name .. '.cfg'
 		if not isfile(file) then return false, 'invalid file' end
 
 		local success, decoded = pcall(httpService.JSONDecode, httpService, readfile(file))
@@ -140,10 +140,10 @@ local SaveManager = {} do
 		local out = {}
 		for i = 1, #list do
 			local file = list[i]
-			if file:sub(-5) == '.json' then
+			if file:sub(-5) == '.cfg' then
 				-- i hate this but it has to be done ...
 
-				local pos = file:find('.json', 1, true)
+				local pos = file:find('.cfg', 1, true)
 				local start = pos
 
 				local char = file:sub(pos, pos)
