@@ -96,7 +96,6 @@ function Library:CreateLabel(Properties, IsHud)
     Library:AddToRegistry(_Instance, {
         TextColor3 = 'FontColor';
     }, IsHud);
-
     return Library:Create(_Instance, Properties);
 end;
 
@@ -133,14 +132,11 @@ function Library:AddToolTip(InfoStr, HoverInstance)
     local Tooltip = Library:Create('Frame', {
         BackgroundColor3 = Library.MainColor,        
         BorderColor3 = Library.OutlineColor,
-
         Size = UDim2.fromOffset(X + 5, Y + 4),
         ZIndex = 11;
         Parent = Library.ScreenGui,
-
         Visible = false,
     })
-
     local Label = Library:CreateLabel({
         Position = UDim2.fromOffset(3, 1),
         Size = UDim2.fromOffset(X, Y);
@@ -149,6 +145,7 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         TextColor3 = Library.FontColor,
         TextXAlignment = Enum.TextXAlignment.Left;
         ZIndex = 12;
+
         RichText = true,
         Parent = Tooltip;
     });
@@ -157,24 +154,20 @@ function Library:AddToolTip(InfoStr, HoverInstance)
         BackgroundColor3 = 'MainColor';
         BorderColor3 = 'OutlineColor';
     });
-
     Library:AddToRegistry(Label, {
         TextColor3 = 'FontColor',
     });
-
     local IsHovering = false
     HoverInstance.MouseEnter:Connect(function()
         IsHovering = true
         
         Tooltip.Position = UDim2.fromOffset(Mouse.X + 15, Mouse.Y + 12)
         Tooltip.Visible = true
-
         while IsHovering do
             RunService.Heartbeat:Wait()
             Tooltip.Position = UDim2.fromOffset(Mouse.X + 15, Mouse.Y + 12)
         end
     end)
-
     HoverInstance.MouseLeave:Connect(function()
         IsHovering = false
         Tooltip.Visible = false
@@ -184,22 +177,17 @@ end
 function Library:OnHighlight(HighlightInstance, Instance, Properties, PropertiesDefault)
     HighlightInstance.MouseEnter:Connect(function()
         local Reg = Library.RegistryMap[Instance];
-
         for Property, ColorIdx in next, Properties do
             Instance[Property] = Library[ColorIdx] or ColorIdx;
-
             if Reg and Reg.Properties[Property] then
                 Reg.Properties[Property] = ColorIdx;
             end;
         end;
     end)
-
     HighlightInstance.MouseLeave:Connect(function()
         local Reg = Library.RegistryMap[Instance];
-
         for Property, ColorIdx in next, PropertiesDefault do
             Instance[Property] = Library[ColorIdx] or ColorIdx;
-
             if Reg and Reg.Properties[Property] then
                 Reg.Properties[Property] = ColorIdx;
             end;
@@ -207,13 +195,12 @@ function Library:OnHighlight(HighlightInstance, Instance, Properties, Properties
     end)
 end;
 
+
 function Library:MouseIsOverOpenedFrame()
     for Frame, _ in next, Library.OpenedFrames do
         local AbsPos, AbsSize = Frame.AbsolutePosition, Frame.AbsoluteSize;
-
         if Mouse.X >= AbsPos.X and Mouse.X <= AbsPos.X + AbsSize.X
             and Mouse.Y >= AbsPos.Y and Mouse.Y <= AbsPos.Y + AbsSize.Y then
-
             return true;
         end;
     end;
@@ -222,11 +209,11 @@ end;
 function Library:MapValue(Value, MinA, MaxA, MinB, MaxB)
     return (1 - ((Value - MinA) / (MaxA - MinA))) * MinB + ((Value - MinA) / (MaxA - MinA)) * MaxB;
 end;
-
 function Library:GetTextBounds(Text, Font, Size, Resolution)
     local Bounds = TextService:GetTextSize(Text, Size, Font, Resolution or Vector2.new(1920, 1080))
     return Bounds.X, Bounds.Y
 end;
+
 
 function Library:GetDarkerColor(Color)
     local H, S, V = Color3.toHSV(Color);
@@ -241,10 +228,8 @@ function Library:AddToRegistry(Instance, Properties, IsHud)
         Properties = Properties;
         Idx = Idx;
     };
-
     table.insert(Library.Registry, Data);
     Library.RegistryMap[Instance] = Data;
-
     if IsHud then
         table.insert(Library.HudRegistry, Data);
     end;
@@ -252,20 +237,17 @@ end;
 
 function Library:RemoveFromRegistry(Instance)
     local Data = Library.RegistryMap[Instance];
-
     if Data then
         for Idx = #Library.Registry, 1, -1 do
             if Library.Registry[Idx] == Data then
                 table.remove(Library.Registry, Idx);
             end;
         end;
-
         for Idx = #Library.HudRegistry, 1, -1 do
             if Library.HudRegistry[Idx] == Data then
                 table.remove(Library.HudRegistry, Idx);
             end;
         end;
-
         Library.RegistryMap[Instance] = nil;
     end;
 end;
@@ -273,14 +255,11 @@ end;
 function Library:UpdateColorsUsingRegistry()
     -- TODO: Could have an 'active' list of objects
     -- where the active list only contains Visible objects.
-
     -- IMPL: Could setup .Changed events on the AddToRegistry function
     -- that listens for the 'Visible' propert being changed.
     -- Visible: true => Add to active list, and call UpdateColors function
     -- Visible: false => Remove from active list.
-
     -- The above would be especially efficient for a rainbow menu color or live color-changing.
-
     for Idx, Object in next, Library.Registry do
         for Property, ColorIdx in next, Object.Properties do
             if type(ColorIdx) == 'string' then
@@ -291,6 +270,7 @@ function Library:UpdateColorsUsingRegistry()
         end;
     end;
 end;
+
 
 function Library:GiveSignal(Signal)
     -- Only used for signals not attached to library instances, as those should be cleaned up on object destruction by Roblox
@@ -501,7 +481,6 @@ do
             ZIndex = 16;
             Parent = PickerFrameInner;
         });
-
 
         Library:AddToRegistry(PickerFrameInner, { BackgroundColor3 = 'BackgroundColor'; BorderColor3 = 'OutlineColor'; });
         Library:AddToRegistry(Highlight, { BackgroundColor3 = 'AccentColor'; });
@@ -809,36 +788,33 @@ do
         end;
 
         function KeyPicker:Update()
-            pcall(function()
-                if Info.NoUI then
-                    return;
+            if Info.NoUI then
+                return;
+            end;
+
+            local State = KeyPicker:GetState();
+
+            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+
+            ContainerLabel.Visible = true;
+            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
+
+            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+
+            local YSize = 0
+            local XSize = 0
+            
+            for _, Label in next, Library.KeybindContainer:GetChildren() do
+                if Label:IsA('TextLabel') and Label.Visible then
+                    YSize = YSize + 18;
+                    if (Label.TextBounds.X > XSize) then
+                        XSize = Label.TextBounds.X 
+                    end 
                 end;
+            end;
 
-                local State = KeyPicker:GetState();
-
-                ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
-
-                ContainerLabel.Visible = true;
-                ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
-
-                Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
-
-                local YSize = 0
-                local XSize = 0
-                
-                for _, Label in next, Library.KeybindContainer:GetChildren() do
-                    if Label:IsA('TextLabel') and Label.Visible then
-                        YSize = YSize + 18;
-                        if (Label.TextBounds.X > XSize) then
-                            XSize = Label.TextBounds.X 
-                        end 
-                    end;
-                end;
-
-                Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
-            end)
+            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
         end;
-
 
         function KeyPicker:GetState()
             if KeyPicker.Mode == 'Always' then
@@ -1960,12 +1936,11 @@ do
                 function Table:UpdateButton()
                     if Info.Multi then
                         Selected = Dropdown.Value[Value];
-                        ButtonLabel.TextColor3 = Selected and Color3.fromRGB(0, 255, 0) or Library.FontColor;
                     else
                         Selected = Dropdown.Value == Value;
-                        ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     end;
 
+                    ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'AccentColor' or 'FontColor';
                 end;
 
@@ -2941,27 +2916,24 @@ function Library:CreateWindow(...)
         local oIcon = Mouse.Icon;
         local State = InputService.MouseIconEnabled;
 
-        if not game:GetService("UserInputService").TouchEnabled then
-            local Cursor = Drawing.new('Triangle');
-            if Cursor then
-                Cursor.Thickness = 1;
-                Cursor.Filled = true;
+        local Cursor = Drawing.new('Triangle');
+        Cursor.Thickness = 1;
+        Cursor.Filled = true;
 
-                while Outer.Visible and ScreenGui.Parent do
-                    local mPos = InputService:GetMouseLocation()
+        while Outer.Visible do
+            local mPos = workspace.CurrentCamera:WorldToViewportPoint(Mouse.Hit.p);
 
-                    Cursor.Color = Library.AccentColor;
-                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
-                    Cursor.PointB = Vector2.new(mPos.X, mPos.Y) + Vector2.new(6, 14);
-                    Cursor.PointC = Vector2.new(mPos.X, mPos.Y) + Vector2.new(-6, 14);
+            Cursor.Color = Library.AccentColor;
+            Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
+            Cursor.PointB = Vector2.new(mPos.X, mPos.Y) + Vector2.new(6, 14);
+            Cursor.PointC = Vector2.new(mPos.X, mPos.Y) + Vector2.new(-6, 14);
 
-                    Cursor.Visible = not InputService.MouseIconEnabled;
+            Cursor.Visible = not InputService.MouseIconEnabled;
 
-                    RenderStepped:Wait();
-                end;
-            end
-            Cursor:Remove();
-        end
+            RenderStepped:Wait();
+        end;
+
+        Cursor:Remove();
     end
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
@@ -2972,31 +2944,6 @@ function Library:CreateWindow(...)
         elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
             task.spawn(Library.Toggle)
         end
-
-        if Input:IsModifierKeyDown(Enum.ModifierKey.Ctrl) and Outer.Visible then
-            local HoveringColorPicker = nil
-
-            for i, colorPicker in next, Options do
-                if colorPicker.Type == 'ColorPicker' then
-                    local displayFrame = colorPicker.DisplayFrame
-                    local tabFrame = displayFrame and displayFrame:findFirstAncestor('TabFrame')
-
-                    if tabFrame and tabFrame.Visible and Library:IsMouseOverFrame(colorPicker.DisplayFrame) then
-                        HoveringColorPicker = colorPicker
-                        break
-                    end
-                end
-            end
-
-            if not HoveringColorPicker then
-                return
-            end
-
-            if Input.KeyCode == Enum.KeyCode.C then
-                Library.ColorClipboard = HoveringColorPicker.Value
-            elseif Input.KeyCode == Enum.KeyCode.V and Library.ColorClipboard then
-                HoveringColorPicker:SetValueRGB(Library.ColorClipboard)
-            end
     end))
 
     if Config.AutoShow then task.spawn(Library.Toggle) end
