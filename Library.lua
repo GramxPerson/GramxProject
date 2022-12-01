@@ -809,33 +809,36 @@ do
         end;
 
         function KeyPicker:Update()
-            if Info.NoUI then
-                return;
-            end;
-
-            local State = KeyPicker:GetState();
-
-            ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
-
-            ContainerLabel.Visible = true;
-            ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
-
-            Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
-
-            local YSize = 0
-            local XSize = 0
-            
-            for _, Label in next, Library.KeybindContainer:GetChildren() do
-                if Label:IsA('TextLabel') and Label.Visible then
-                    YSize = YSize + 18;
-                    if (Label.TextBounds.X > XSize) then
-                        XSize = Label.TextBounds.X 
-                    end 
+            pcall(function()
+                if Info.NoUI then
+                    return;
                 end;
-            end;
 
-            Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+                local State = KeyPicker:GetState();
+
+                ContainerLabel.Text = string.format('[%s] %s (%s)', KeyPicker.Value, Info.Text, KeyPicker.Mode);
+
+                ContainerLabel.Visible = true;
+                ContainerLabel.TextColor3 = State and Library.AccentColor or Library.FontColor;
+
+                Library.RegistryMap[ContainerLabel].Properties.TextColor3 = State and 'AccentColor' or 'FontColor';
+
+                local YSize = 0
+                local XSize = 0
+                
+                for _, Label in next, Library.KeybindContainer:GetChildren() do
+                    if Label:IsA('TextLabel') and Label.Visible then
+                        YSize = YSize + 18;
+                        if (Label.TextBounds.X > XSize) then
+                            XSize = Label.TextBounds.X 
+                        end 
+                    end;
+                end;
+
+                Library.KeybindFrame.Size = UDim2.new(0, math.max(XSize + 10, 210), 0, YSize + 23)
+            end)
         end;
+
 
         function KeyPicker:GetState()
             if KeyPicker.Mode == 'Always' then
@@ -1957,11 +1960,12 @@ do
                 function Table:UpdateButton()
                     if Info.Multi then
                         Selected = Dropdown.Value[Value];
+                        ButtonLabel.TextColor3 = Selected and Color3.fromRGB(0, 255, 0) or Library.FontColor;
                     else
                         Selected = Dropdown.Value == Value;
+                        ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     end;
 
-                    ButtonLabel.TextColor3 = Selected and Library.AccentColor or Library.FontColor;
                     Library.RegistryMap[ButtonLabel].Properties.TextColor3 = Selected and 'AccentColor' or 'FontColor';
                 end;
 
@@ -2937,24 +2941,27 @@ function Library:CreateWindow(...)
         local oIcon = Mouse.Icon;
         local State = InputService.MouseIconEnabled;
 
-        local Cursor = Drawing.new('Triangle');
-        Cursor.Thickness = 1;
-        Cursor.Filled = true;
+        if not game:GetService("UserInputService").TouchEnabled then
+            local Cursor = Drawing.new('Triangle');
+            if Cursor then
+                Cursor.Thickness = 1;
+                Cursor.Filled = true;
 
-        while Outer.Visible do
-            local mPos = workspace.CurrentCamera:WorldToViewportPoint(Mouse.Hit.p);
+                while Outer.Visible and ScreenGui.Parent do
+                    local mPos = InputService:GetMouseLocation()
 
-            Cursor.Color = Library.AccentColor;
-            Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
-            Cursor.PointB = Vector2.new(mPos.X, mPos.Y) + Vector2.new(6, 14);
-            Cursor.PointC = Vector2.new(mPos.X, mPos.Y) + Vector2.new(-6, 14);
+                    Cursor.Color = Library.AccentColor;
+                    Cursor.PointA = Vector2.new(mPos.X, mPos.Y);
+                    Cursor.PointB = Vector2.new(mPos.X, mPos.Y) + Vector2.new(6, 14);
+                    Cursor.PointC = Vector2.new(mPos.X, mPos.Y) + Vector2.new(-6, 14);
 
-            Cursor.Visible = not InputService.MouseIconEnabled;
+                    Cursor.Visible = not InputService.MouseIconEnabled;
 
-            RenderStepped:Wait();
-        end;
-
-        Cursor:Remove();
+                    RenderStepped:Wait();
+                end;
+            end
+            Cursor:Remove();
+        end
     end
 
     Library:GiveSignal(InputService.InputBegan:Connect(function(Input, Processed)
@@ -2965,6 +2972,31 @@ function Library:CreateWindow(...)
         elseif Input.KeyCode == Enum.KeyCode.RightControl or (Input.KeyCode == Enum.KeyCode.RightShift and (not Processed)) then
             task.spawn(Library.Toggle)
         end
+
+        if Input:IsModifierKeyDown(Enum.ModifierKey.Ctrl) and Outer.Visible then
+            local HoveringColorPicker = nil
+
+            for i, colorPicker in next, Options do
+                if colorPicker.Type == 'ColorPicker' then
+                    local displayFrame = colorPicker.DisplayFrame
+                    local tabFrame = displayFrame and displayFrame:findFirstAncestor('TabFrame')
+
+                    if tabFrame and tabFrame.Visible and Library:IsMouseOverFrame(colorPicker.DisplayFrame) then
+                        HoveringColorPicker = colorPicker
+                        break
+                    end
+                end
+            end
+
+            if not HoveringColorPicker then
+                return
+            end
+
+            if Input.KeyCode == Enum.KeyCode.C then
+                Library.ColorClipboard = HoveringColorPicker.Value
+            elseif Input.KeyCode == Enum.KeyCode.V and Library.ColorClipboard then
+                HoveringColorPicker:SetValueRGB(Library.ColorClipboard)
+            end
     end))
 
     if Config.AutoShow then task.spawn(Library.Toggle) end
