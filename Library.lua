@@ -44,7 +44,7 @@ local Library = {
     maid = {};
     ScreenGui = ScreenGui;
 };
-local Library.Maid = Library.maid
+Library.Maid = Library.maid
 local RainbowStep = 0
 local Hue = 0
 
