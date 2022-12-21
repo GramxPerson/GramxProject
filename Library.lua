@@ -44,7 +44,7 @@ local Library = {
     Maid = {};
     ScreenGui = ScreenGui;
 };
-Library.Maid = Library.Maid
+
 local RainbowStep = 0
 local Hue = 0
 
@@ -65,16 +65,7 @@ table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1);
     end
 end))
-local __runscript = true
-local function wait_check(...)
-	if __runscript then
-		return wait(...)
-	else
-		wait()
-		return false
-	end
-end
-Library.Maid.Wait, Library.Maid.wait, Library.Wait = wait_check, wait_check, wait_check
+
 function Library:AttemptSave()
     if Library.SaveManager then
         Library.SaveManager:Save();
