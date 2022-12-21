@@ -27,7 +27,7 @@ getgenv().Options = Options;
 local Library = {
     Registry = {};
     RegistryMap = {};
-
+	
     HudRegistry = {};
 
     FontColor = Color3.fromRGB(255, 255, 255);
@@ -41,6 +41,7 @@ local Library = {
     OpenedFrames = {};
 
     Signals = {};
+    Maid = {};
     ScreenGui = ScreenGui;
 };
 
@@ -63,7 +64,16 @@ table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
         Library.CurrentRainbowColor = Color3.fromHSV(Hue, 0.8, 1);
     end
 end))
-
+local __runscript = true
+local function wait_check(...)
+	if __runscript then
+		return wait(...)
+	else
+		wait()
+		return false
+	end
+end
+Library.Maid.Wait, Library.Maid.wait, library.Wait = wait_check, wait_check, wait_check
 function Library:AttemptSave()
     if Library.SaveManager then
         Library.SaveManager:Save();
