@@ -73,7 +73,7 @@ local function wait_check(...)
 		return false
 	end
 end
-Library.Maid.Wait, Library.Maid.wait, library.Wait = wait_check, wait_check, wait_check
+Library.Maid.Wait, Library.Maid.wait, Library.Wait = wait_check, wait_check, wait_check
 function Library:AttemptSave()
     if Library.SaveManager then
         Library.SaveManager:Save();
