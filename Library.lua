@@ -41,12 +41,13 @@ local Library = {
     OpenedFrames = {};
 
     Signals = {};
-    Maid = {};
+    maid = {};
     ScreenGui = ScreenGui;
 };
-
+local Library.Maid = Library.maid
 local RainbowStep = 0
 local Hue = 0
+
 
 table.insert(Library.Signals, RenderStepped:Connect(function(Delta)
     RainbowStep = RainbowStep + Delta
@@ -73,7 +74,7 @@ local function wait_check(...)
 		return false
 	end
 end
-Library.Maid.Wait, Library.Maid.wait, Library.Wait = wait_check, wait_check, wait_check
+Library.maid.Wait, Library.maid.wait, Library.Wait = wait_check, wait_check, wait_check
 function Library:AttemptSave()
     if Library.SaveManager then
         Library.SaveManager:Save();
