@@ -44,7 +44,7 @@ local Library = {
     maid = {};
     ScreenGui = ScreenGui;
 };
-Library.Maid = Library.maid
+Library.Maid = Library.Maid
 local RainbowStep = 0
 local Hue = 0
 
@@ -74,7 +74,7 @@ local function wait_check(...)
 		return false
 	end
 end
-Library.maid.Wait, Library.maid.wait, Library.Wait = wait_check, wait_check, wait_check
+Library.Maid.Wait, Library.Maid.wait, Library.Wait = wait_check, wait_check, wait_check
 function Library:AttemptSave()
     if Library.SaveManager then
         Library.SaveManager:Save();
