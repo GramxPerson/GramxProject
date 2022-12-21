@@ -41,7 +41,7 @@ local Library = {
     OpenedFrames = {};
 
     Signals = {};
-    maid = {};
+    Maid = {};
     ScreenGui = ScreenGui;
 };
 Library.Maid = Library.Maid
